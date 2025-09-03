@@ -1,0 +1,60 @@
+<!-- DOM Stands for document object model -->
+<!-- with the help of js we can manipulate our DOM -->
+<!-- with getElementById, getElementByClassName querySelector we can target a specific node of the DOM -->
+<E!-- differnce bertween nodelist and htmlcollection -->
+<!-- nodelist is a live collection of elements and htmlcollection is a static collection of elements -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style></style>
+  </head>
+  <body>
+    <div id="parent">
+      this is
+      <li class="days">Monday</li>
+      <li class="days">Tuesday</li>
+      <li class="days">Wednesday</li>
+      <li class="days">Thursday</li>
+      <li class="days">Friday</li>
+      <li class="days">Saturday</li>
+      <li class="days">Sunday</li>
+    </div>
+  </body>
+
+  <script>
+    const parent = document.querySelector("#parent"); //querySelectorAll is used to select all the elements with the same class name  with the symbol as per the selector is gives the single element but querySelector is used to select the first element with the same class name querySelectorAll is used to select all the elements with the same class name and it returns the NodeList of the elements
+    console.log(parent.firstElementChild);// firstElementChild is used to select the first child of the parent element
+    parent.children[1].style.color = "Blue"; //.children is used to select all the children of the parent element
+                    // and its give the HTML collection of the children elements
+    console.log(parent.lastElementChild) //lastElementChild is used to select the last child of the parent element
+    const dayOne = document.querySelector(".days"); //.querySelector is used to select the first element with the same class name
+    console.log(dayOne.nextElementSibling) //nextElementSibling is used to select the next sibling of the element
+    console.log("NODES: ", parent.childNodes); //childNodes is used to select all the child nodes of the parent element it returns the Nodelist of the child nodes
+    console.log(parent.children);
+
+
+    function createNewDiv(text, colors){
+      let colorIndex = 0;
+      const button = document.createElement('button'); //create element is used to create a new element
+      button.className = 'new-button'; //className is used to give a class name to the element
+      button.setAttribute('title', "generated title"); //setAttribute is used to give a attribute to the element
+      button.style.backgroundColor = colors[colorIndex]; //style is used to give a style to the element
+      button.style.padding = '12px'; //padding is used to give a padding to the element
+      button.innerText = text; //innerText is used to give a text to the element but we can use textContent to give a text to the element also InnerHTML is used to give a html to the element but there is difference between innerText and textContent and innerHTML is used to give a html to the element and textContent is used to give a text to the element innerText 
+      button.addEventListener('click', function() { //addEventListener is used to add a event to the element
+        colorIndex = (colorIndex + 1) % colors.length; //colorIndex is used to give a color to the element
+        button.style.backgroundColor = colors[colorIndex]; //style is used to give a style to the element
+      });
+
+      document.body.appendChild(button);
+    }
+
+    // Usage:
+    let text = "This is a new div";
+    let colors = ["Red", "Green", "Blue", "Yellow", "Pink"];
+    createNewDiv(text, colors);
+  </script>
+</html>

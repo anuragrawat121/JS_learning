@@ -1,0 +1,53 @@
+// ways to create a new element
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chai aur code | DOM</title>
+  </head>
+  <body style="background-color: #212121; color: #fff">
+    <ul class="language">
+      <li>Javascript</li>
+    </ul>
+  </body>
+  <script>
+    function addLanguage(langName) {
+      const li = document.createElement("li"); // first way with create element with createElement and appendChild
+      li.textContent = `${langName}`; //also we can use innerHTML, innerText, textContent, createTextNode, appendChild, prepend, replaceWith, remove, etc. 
+      document.querySelector(".language").appendChild(li);
+    }
+    addLanguage("python");
+    addLanguage("typescript");
+
+    function addOptiLanguage(langName) {
+      const li = document.createElement("li"); // second way with create element with createElement and appendChild 
+      li.appendChild(document.createTextNode(langName));
+      document.querySelector(".language").appendChild(li);
+    } //createTextNode is used to create a text node and appendChild is used to append the text node to the parent element
+    addOptiLanguage("golang");
+
+     function addWithAppend(langName){
+          const li = document.createElement("li");
+          li.append(document.createTextNode(langName));
+          document.querySelector(".language").append(li);
+     }
+     addWithAppend("Ruby-on-Rails");
+
+    //Edit
+    const secondLang = document.querySelector("li:nth-child(2)");
+    console.log(secondLang);
+    //secondLang.innerHTML = "Mojo"
+    const newli = document.createElement("li");
+    newli.textContent = "Mojo";
+    secondLang.replaceWith(newli);
+
+    //edit
+    const firstLang = document.querySelector("li:first-child");
+    firstLang.outerHTML = "<li>TypeScript</li>";
+   
+     
+  </script>
+</html>

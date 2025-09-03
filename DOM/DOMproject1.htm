@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Number Guesser</title>
+	<style>
+		:root {
+			--bg: #0a0b10;
+			--card: rgba(17, 20, 31, 0.6);
+			--card-border: rgba(148, 163, 184, 0.18);
+			--text: #e5e7eb;
+			/* zinc-200 */
+			--muted: #94a3b8;
+			/* slate-400 */
+			--accent: #22d3ee;
+			/* cyan-400 */
+			--accent-2: #a78bfa;
+			/* violet-400 */
+			--ok: #22c55e;
+			/* green-500 */
+			--warn: #f59e0b;
+			/* amber-500 */
+			--danger: #ef4444;
+			/* red-500 */
+			--ring: rgba(167, 139, 250, 0.28);
+			--shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+			--radius: 16px;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		html,
+		body {
+			height: 100%;
+		}
+
+		body {
+			margin: 0;
+			font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+			color: var(--text);
+			background: var(--bg);
+			display: grid;
+			place-items: center;
+			min-height: 100svh;
+			overflow: hidden;
+			padding: clamp(12px, 2vw, 24px);
+			position: relative;
+		}
+
+		/* Animated gaming gradient + glow */
+		body::before {
+			content: "";
+			position: absolute;
+			inset: -20% -10% -10% -20%;
+			background: conic-gradient(from var(--angle), #0ea5e9, #22d3ee, #a78bfa, #f472b6, #22d3ee);
+			filter: blur(80px) saturate(120%);
+			opacity: 0.35;
+			animation: rotate 18s linear infinite;
+			z-index: -2;
+		}
+
+		/* Subtle cyber grid */
+		body::after {
+			content: "";
+			position: absolute;
+			inset: 0;
+			background:
+				repeating-linear-gradient(to right,
+					rgba(99, 102, 241, 0.08) 0 1px,
+					transparent 1px 40px),
+				repeating-linear-gradient(to bottom,
+					rgba(99, 102, 241, 0.08) 0 1px,
+					transparent 1px 40px);
+			opacity: 0.25;
+			mask-image: radial-gradient(1200px 800px at 50% 30%, #000 40%, transparent 80%);
+			z-index: -1;
+		}
+
+		@keyframes rotate {
+			0% {
+				--angle: 0deg;
+			}
+
+			100% {
+				--angle: 360deg;
+			}
+		}
+
+		.card {
+			width: min(92vw, 520px);
+			background: var(--card);
+			border-radius: var(--radius);
+			box-shadow: var(--shadow);
+			padding: clamp(16px, 4vw, 28px);
+			backdrop-filter: blur(14px) saturate(120%);
+			border: 1px solid var(--card-border);
+			display: grid;
+			gap: clamp(14px, 3vw, 22px);
+			max-height: 90svh;
+			overflow: auto;
+			scrollbar-gutter: stable both-edges;
+			position: relative;
+		}
+
+		/* Disable scrolling on the card when a modal/overlay is open */
+		.card.modal-open {
+			overflow: hidden;
+		}
+
+		header {
+			text-align: center;
+			display: grid;
+			gap: 6px;
+		}
+
+		h1 {
+			margin: 0;
+			font-size: clamp(22px, 3.6vw, 30px);
+			letter-spacing: .2px;
+		}
+
+		p.sub {
+			margin: 0;
+			color: var(--muted);
+			font-size: clamp(13px, 2.6vw, 15px);
+		}
+
+		.range {
+			display: inline-flex;
+			align-self: center;
+			gap: 10px;
+			padding: 10px 14px;
+			border-radius: 999px;
+			background: rgba(99, 102, 241, 0.12);
+			color: #e2e8f0;
+			font-weight: 600;
+			font-size: 14px;
+			border: 1px solid rgba(167, 139, 250, 0.25);
+			box-shadow: inset 0 0 25px rgba(99, 102, 241, 0.1);
+		}
+
+		.group {
+			display: grid;
+			gap: 12px;
+		}
+
+		label {
+			font-size: 14px;
+			color: var(--muted);
+		}
+
+		.field {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 12px;
+			align-items: center;
+		}
+
+		input[type="number"] {
+			appearance: textfield;
+			width: 100%;
+			padding: 14px 14px;
+			font-size: 16px;
+			border-radius: 12px;
+			border: 1.5px solid rgba(148, 163, 184, 0.25);
+			outline: none;
+			transition: box-shadow .2s ease, border-color .2s ease, transform .08s ease, background .2s ease;
+			background: rgba(2, 6, 23, 0.45);
+			color: var(--text);
+		}
+
+		input[type="number"]::placeholder {
+			color: #94a3b8;
+		}
+
+		input[type="number"]:focus {
+			border-color: var(--accent-2);
+			box-shadow: 0 0 0 6px var(--ring), inset 0 0 18px rgba(99, 102, 241, 0.15);
+			background: rgba(2, 6, 23, 0.6);
+		}
+
+		input[type="number"]::-webkit-outer-spin-button,
+		input[type="number"]::-webkit-inner-spin-button {
+			-webkit-appearance: none;
+			margin: 0;
+		}
+
+		.btns {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 10px;
+		}
+
+		.btn {
+			border: 0;
+			border-radius: 12px;
+			padding: 12px 14px;
+			font-weight: 800;
+			letter-spacing: .25px;
+			cursor: pointer;
+			transition: transform .08s ease, box-shadow .2s ease, background .2s ease, filter .2s ease;
+			box-shadow: 0 10px 24px rgba(3, 7, 18, .35);
+			white-space: nowrap;
+		}
+
+		.btn:active {
+			transform: translateY(1px);
+		}
+
+		.primary {
+			color: #06121f;
+			background: linear-gradient(135deg, var(--accent), var(--accent-2));
+		}
+
+		.primary:hover {
+			filter: brightness(1.1);
+			box-shadow: 0 16px 32px rgba(99, 102, 241, .35);
+		}
+
+		.ghost {
+			color: var(--text);
+			background: rgba(99, 102, 241, 0.12);
+			border: 1px solid rgba(167, 139, 250, 0.25);
+		}
+
+		.ghost:hover {
+			background: rgba(99, 102, 241, 0.18);
+		}
+
+		.message {
+			display: none;
+		}
+
+		.stats {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 10px;
+			border: 1px solid rgba(148, 163, 184, 0.18);
+			border-radius: 12px;
+			padding: 12px;
+			text-align: center;
+			box-shadow: inset 0 0 18px rgba(99, 102, 241, 0.08);
+		}
+
+		.stat .k {
+			display: block;
+			font-size: 12px;
+			color: var(--muted);
+		}
+
+		.stat .v {
+			display: block;
+			font-weight: 900;
+			font-size: 18px;
+			margin-top: 2px;
+		}
+
+		.history {
+			display: grid;
+			gap: 8px;
+		}
+
+		.history h3 {
+			margin: 0;
+			font-size: 14px;
+			color: var(--muted);
+		}
+
+		.list {
+			display: grid;
+			gap: 8px;
+			max-height: 160px;
+			overflow: auto;
+			padding-right: 4px;
+		}
+
+		.item {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			border-radius: 10px;
+			padding: 10px 12px;
+			border: 1px solid rgba(148, 163, 184, 0.18);
+			background: rgba(2, 6, 23, 0.45);
+			box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25), inset 0 0 16px rgba(99, 102, 241, 0.08);
+			font-size: 14px;
+		}
+
+		.tag {
+			font-size: 12px;
+			font-weight: 800;
+			padding: 6px 10px;
+			border-radius: 999px;
+			border: 1px solid transparent;
+		}
+
+		.high {
+			background: rgba(239, 68, 68, 0.14);
+			color: #fecaca;
+			border-color: rgba(239, 68, 68, 0.35);
+		}
+
+		.low {
+			background: rgba(59, 130, 246, 0.14);
+			color: #bfdbfe;
+			border-color: rgba(59, 130, 246, 0.35);
+		}
+
+		.ok {
+			background: rgba(34, 197, 94, 0.14);
+			color: #bbf7d0;
+			border-color: rgba(34, 197, 94, 0.35);
+		}
+
+		footer {
+			text-align: center;
+			color: var(--muted);
+			font-size: 12px;
+		}
+
+		@media (max-width: 420px) {
+			.btns {
+				grid-template-columns: 1fr;
+			}
+
+			.stats {
+				grid-template-columns: repeat(3, 1fr);
+			}
+		}
+
+		@media (max-width: 360px) {
+			.card {
+				width: 96vw;
+				padding: 14px;
+			}
+
+			.range {
+				font-size: 13px;
+				padding: 8px 12px;
+			}
+		}
+
+		/* Win overlay/card (hidden by default) */
+		.win-overlay {
+			display: none;
+			position: fixed;
+			inset: 0;
+			padding: clamp(12px, 2vw, 24px);
+			background: rgba(2, 6, 23, 0.6);
+			backdrop-filter: blur(6px) saturate(120%);
+			place-items: center;
+			z-index: 50;
+		}
+
+		.win-overlay.is-visible {
+			display: grid;
+		}
+
+		.win-card {
+			width: min(92vw, 520px);
+			background: var(--card);
+			border-radius: var(--radius);
+			box-shadow: var(--shadow);
+			padding: clamp(18px, 4vw, 28px);
+			backdrop-filter: blur(14px) saturate(120%);
+			border: 1px solid var(--card-border);
+			display: grid;
+			gap: clamp(12px, 3vw, 18px);
+			text-align: center;
+		}
+
+		.win-title {
+			margin: 0;
+			font-size: clamp(20px, 3.6vw, 28px);
+			letter-spacing: .2px;
+		}
+
+		.win-sub {
+			margin: 0;
+			color: var(--muted);
+			font-size: clamp(13px, 2.6vw, 15px);
+		}
+
+		.win-actions {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 10px;
+		}
+
+		/* Invalid input overlay (hidden by default) */
+		.win-overlay.invalid-open {
+			display: grid;
+		}
+
+		.win-card.invalid-open {
+			background: var(--card);
+			border-radius: var(--radius);
+			box-shadow: var(--shadow);
+			padding: clamp(18px, 4vw, 28px);
+			backdrop-filter: blur(14px) saturate(120%);
+			border: 1px solid var(--card-border);
+			display: grid;
+			gap: clamp(12px, 3vw, 18px);
+			text-align: center;
+		}
+
+		.win-title.invalid-open {
+			margin: 0;
+			font-size: clamp(20px, 3.6vw, 28px);
+			letter-spacing: .2px;
+		}
+
+		.win-sub.invalid-open {
+			margin: 0;
+			color: var(--muted);
+			font-size: clamp(13px, 2.6vw, 15px);
+		}
+
+		.win-actions.invalid-open {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 10px;
+		}
+
+		/* Center the OK button in invalid popup */
+		.invalid-actions {
+			justify-items: center;
+		}
+
+		.invalid-actions .btn {
+			min-width: 120px;
+		}
+	</style>
+</head>
+
+<body>
+	<main class="card" role="application" aria-label="Number Guesser UI">
+		<header>
+			<h1>Number Guesser</h1>
+			<p class="sub">HTML + CSS only UI</p>
+			<span class="range" aria-live="polite">Range: 1–100</span>
+		</header>
+
+		<section class="group" aria-labelledby="guess-label">
+			<label id="guess-label" for="guess-input">Your guess</label>
+			<div class="field">
+				<input id="guess-input" type="number" inputmode="numeric" min="1" max="100" required
+					placeholder="Enter a number between 1 and 100">
+				<div class="btns">
+					<button type="button" id='submit' class="btn primary" aria-label="Submit guess">Submit</button>
+					<button type="button" id="new-game" class="btn ghost" aria-label="Start a new game">New
+						game</button>
+				</div>
+			</div>
+		</section>
+
+		<section class="stats" aria-label="Game stats (static)">
+			<div class="stat"><span class="k">Attempts left</span><span id='attempts-left' class="v">10</span></div>
+			<div class="stat"><span class="k">Best</span><span class="v">—</span></div>
+			<div class="stat"><span class="k">Streak</span><span class="v">—</span></div>
+		</section>
+
+		<section class="history" aria-labelledby="history-title">
+			<h3 id="history-title">Recent guesses (example)</h3>
+			<div class="list" role="list">
+				<div class="item" role="listitem">
+					<span>Attempt 1 </span>
+					<span class="tag high">Too high</span>
+				</div>
+		</section>
+
+	<footer>Responsive • Neon/Glass • No JavaScript</footer>
+	</main>
+
+    
+	
+	<!-- Success overlay (hidden by default) --><!-- Popup Card -->
+	<div id="win-overlay" class="win-overlay" role="dialog" aria-modal="true" aria-hidden="true"
+		aria-labelledby="win-title" aria-describedby="win-desc">
+		<div class="win-card">
+			<h2 id="win-title" class="win-title">You guessed it!</h2>
+			<p id="win-desc" class="win-sub">The secret number was <span id="win-number" class="ok">—</span>.</p>
+			<div class="win-actions">
+				<button type="button" id="win-play-again" class="btn primary">Play again</button>
+				<button type="button" id="win-close" class="btn ghost">Close</button>
+			</div>
+		</div>
+	</div>
+
+	
+</body>
+
+</html>
+
+<script>
+	let flag = true;
+	let attempts = 10;
+	let secretNumber = Math.round(Math.random() * 100 + 1);
+	console.log(secretNumber);
+
+
+	document.querySelector("#submit").addEventListener("click", checkNumber)
+	document.querySelector("#new-game").addEventListener("click", startNewGame)
+	
+	// Add Enter key support for input field
+	document.querySelector("#guess-input").addEventListener("keypress", function(e) {
+		if (e.key === "Enter") {
+			checkNumber();
+		}
+	})
+
+	function checkNumber(e) {
+
+		let guessedNumber = Number(document.querySelector("#guess-input").value);
+		console.log(guessedNumber);
+		const isInvalid = !Number.isFinite(guessedNumber) || guessedNumber < 1 || guessedNumber > 100;
+		if (isInvalid) {
+			const card = document.querySelector('main.card');
+			card.classList.add('modal-open');
+			const invalid = document.getElementById('invalid-overlay');
+			invalid.classList.add('is-visible');
+			invalid.setAttribute('aria-hidden', 'false');
+			return; // stop here without decrementing attempts
+		}
+		if (attempts <= 0) {
+			flag = false;
+			console.log("Game Over!");
+		}
+		if (flag === true) {
+			document.querySelector("#guess-input").value = '';
+			if (guessedNumber == secretNumber) {
+				console.log("congrats");
+				document.getElementById('win-number').textContent = secretNumber;
+				document.getElementById('win-overlay').classList.add('is-visible');
+				document.getElementById('win-overlay').setAttribute('aria-hidden', 'false');
+			}
+			else {
+				attempts--;
+				let leftAttempts = document.getElementById('attempts-left');
+				leftAttempts.textContent = attempts;
+				
+				// Add guess to history
+				addGuessToHistory(guessedNumber, guessedNumber > secretNumber ? 'high' : 'low');
+				
+				// Check if game over
+				if (attempts <= 0) {
+					// Game over - show losing message
+					document.getElementById('win-title').textContent = 'Game Over!';
+					document.getElementById('win-desc').innerHTML = `The secret number was <span id="win-number" class="ok">${secretNumber}</span>. Better luck next time!`;
+					document.getElementById('win-play-again').textContent = 'Try Again';
+					document.getElementById('win-overlay').classList.add('is-visible');
+					document.getElementById('win-overlay').setAttribute('aria-hidden', 'false');
+				}
+			}
+		}
+
+	}
+
+	// Function to add guess to history
+	function addGuessToHistory(guess, result) {
+		const historyList = document.querySelector('.list');
+		const historyItem = document.createElement('div');
+		historyItem.className = 'item';
+		historyItem.setAttribute('role', 'listitem');
+		
+		const guessText = document.createElement('span');
+		guessText.textContent = `Attempt ${11 - attempts}: ${guess}`;
+		
+		const resultTag = document.createElement('span');
+		resultTag.className = `tag ${result}`;
+		resultTag.textContent = result === 'high' ? 'Too high' : 'Too low';
+		
+		historyItem.appendChild(guessText);
+		historyItem.appendChild(resultTag);
+		
+		// Add to beginning of list
+		historyList.insertBefore(historyItem, historyList.firstChild);
+		
+		// Keep only last 5 guesses
+		while (historyList.children.length > 5) {
+			historyList.removeChild(historyList.lastChild);
+		}
+	}
+
+	// Function to clear guess history
+	function clearGuessHistory() {
+		const historyList = document.querySelector('.list');
+		// Keep the example item, remove others
+		const exampleItem = historyList.querySelector('.item');
+		historyList.innerHTML = '';
+		if (exampleItem) {
+			historyList.appendChild(exampleItem);
+		}
+	}
+
+	// Function to start a new game
+	function startNewGame() {
+		attempts = 10;
+		flag = true;
+		secretNumber = Math.round(Math.random() * 100 + 1);
+		document.getElementById('attempts-left').textContent = attempts;
+		document.getElementById('guess-input').value = '';
+		clearGuessHistory();
+		console.log('New game started. Secret number:', secretNumber);
+	}
+
+	//winning popUp
+	document.getElementById('win-play-again').addEventListener('click', (e) => {
+		document.getElementById('win-overlay').classList.remove('is-visible');
+		document.getElementById('win-overlay').setAttribute('aria-hidden', 'true');
+		// Reset game
+		attempts = 10;
+		flag = true;
+		secretNumber = Math.round(Math.random() * 100 + 1);
+		document.getElementById('attempts-left').textContent = attempts;
+		document.getElementById('win-title').textContent = 'You guessed it!';
+		document.getElementById('win-desc').innerHTML = 'The secret number was <span id="win-number" class="ok">—</span>.';
+		document.getElementById('win-play-again').textContent = 'Play again';
+		// Clear history
+		clearGuessHistory();
+		console.log('New game started. Secret number:', secretNumber);
+	})
+
+	// Close button for winning popup
+	document.getElementById('win-close').addEventListener('click', (e) => {
+		document.getElementById('win-overlay').classList.remove('is-visible');
+		document.getElementById('win-overlay').setAttribute('aria-hidden', 'true');
+	})
+
+
+
+	
+</script>
