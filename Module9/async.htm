@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>asyncJS</title>
+</head>
+<style>
+  body {
+    height: 100dvh;
+  }
+</style>
+
+<body>
+  <button id="start">start</button>
+  <button id="stopped">stop</button>
+
+  <script>
+    const startBtn = document.getElementById("start");
+    const stopBtn = document.getElementById("stopped");
+    const hexValue = "0123456789ABCDEF";
+    let interval;
+
+    startBtn.addEventListener("click", () => {
+      interval = setInterval(() => {
+        let bgClr = "#";
+        for (let i = 0; i < 6; i++) {
+          bgClr += hexValue[Math.floor(Math.random() * 16)];
+        }
+        document.body.style.backgroundColor = bgClr;
+        console.log(bgClr);
+      }, 1000);
+    });
+
+    stopBtn.addEventListener("click", () => {
+      clearInterval(interval);
+    });
+  </script>
+</body>
+
+</html>
