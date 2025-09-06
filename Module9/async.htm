@@ -20,14 +20,20 @@
     const startBtn = document.getElementById("start");
     const stopBtn = document.getElementById("stopped");
     const hexValue = "0123456789ABCDEF";
-    let interval;
+    let interval = null; // track interval
+
+    function getRandomColor() {
+      let color = "#";
+      for (let i = 0; i < 6; i++) {
+        color += hexValue[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
 
     startBtn.addEventListener("click", () => {
+      if (interval) return; // prevent multiple intervals
       interval = setInterval(() => {
-        let bgClr = "#";
-        for (let i = 0; i < 6; i++) {
-          bgClr += hexValue[Math.floor(Math.random() * 16)];
-        }
+        let bgClr = getRandomColor();
         document.body.style.backgroundColor = bgClr;
         console.log(bgClr);
       }, 1000);
@@ -35,6 +41,7 @@
 
     stopBtn.addEventListener("click", () => {
       clearInterval(interval);
+      interval = null; // reset so we can start again later
     });
   </script>
 </body>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>api & V8</title>
+</head>
+<style>
+     img {
+          width: 100px;
+          height: 100px;
+     }
+
+     h1 {
+          font-size: 20px;
+          font-weight: bold;
+     }
+
+     p {
+          font-size: 16px;
+          font-weight: normal;
+     }
+
+     button {
+          padding: 10px 20px;
+          background-color: #000;
+          color: #fff;
+          border: none;
+          border-radius: 5px;
+     }
+</style>
+
+<body>
+     <h1>api request using xhr object (old method) and V8</h1>
+     <button id="btn">Get User Info</button>
+
+     <script>
+          const btn = document.getElementById('btn');
+
+          btn.addEventListener('click', function () {
+               const reqUrl = 'https://api.github.com/users/hiteshchoudhary';
+               const xhr = new XMLHttpRequest();
+               xhr.open('GET', reqUrl);
+               xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                         if (xhr.status === 200) {
+                              const data = JSON.parse(xhr.responseText);
+
+                              // Create image
+                              const img = document.createElement('img');
+                              img.src = data.avatar_url;
+                              img.width = 100;
+                              img.height = 100;
+                              document.body.appendChild(img);
+
+                              // Create h1 for name
+                              const h1 = document.createElement('h1');
+                              h1.textContent = data.name;
+                              document.body.appendChild(h1);
+
+                              // Create p for followers
+                              const p = document.createElement('p');
+                              p.textContent = `Followers: ${data.followers}`;
+                              document.body.appendChild(p);
+
+                         } else {
+                              console.error("Request failed:", xhr.status);
+                         }
+                    }
+               };
+               xhr.send();
+          });
+     </script>
+</body>
+
+</html>
